@@ -33,6 +33,13 @@
             android:layout_marginBottom="20dp"
             android:text="Test" />
 
+        <TextView
+            android:id="@+id/sheet"
+            style="@style/CategoryStyle"
+            android:background="#b4eeaa"
+            android:layout_marginBottom="20dp"
+            android:text="Sheet" />
+
     </LinearLayout>
 
 </ScrollView>

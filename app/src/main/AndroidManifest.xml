@@ -86,6 +86,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".WriteActivity"/>
         </activity>
+        <activity
+            android:name=".SheetAPIActivity"
+            android:label="Álbum"
+            android:parentActivityName=".WriteActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".WriteActivity"/>
+        </activity>
     </application>
 
 </manifest>

@@ -48,6 +48,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.sheet).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getBaseContext(), SheetAPIActivity.class);
+                startActivity(intent);
+            }
+        });
+
         tvWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
