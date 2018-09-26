@@ -135,11 +135,6 @@ public class SheetAPIActivity extends Activity
             }
         });
 
-
-
-
-
-
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("Obtendo dados Planilha Dados");
 
