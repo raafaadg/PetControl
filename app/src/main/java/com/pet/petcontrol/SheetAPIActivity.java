@@ -84,7 +84,8 @@ public class SheetAPIActivity extends Activity
 
         list = new ArrayList<>();
         adapter = new MyArrayAdapter(this, list);
-
+        listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(adapter);
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -160,7 +161,7 @@ public class SheetAPIActivity extends Activity
         } else if (mCredential.getSelectedAccountName() == null) {
             chooseAccount();
         } else if (! isDeviceOnline()) {
-            mOutputText.setText("No network connection available.");
+//            mOutputText.setText("No network connection available.");
         } else {
             new MakeRequestTask(mCredential).execute();
         }
@@ -218,9 +219,9 @@ public class SheetAPIActivity extends Activity
         switch(requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
-                    mOutputText.setText(
-                            "This app requires Google Play Services. Please install " +
-                                    "Google Play Services on your device and relaunch this app.");
+//                    mOutputText.setText(
+//                            "This app requires Google Play Services. Please install " +
+//                                    "Google Play Services on your device and relaunch this app.");
                 } else {
                     getResultsFromApi();
                 }
@@ -422,7 +423,7 @@ public class SheetAPIActivity extends Activity
 
         @Override
         protected void onPreExecute() {
-            mOutputText.setText("");
+//            mOutputText.setText("");
             mProgress.show();
         }
 
@@ -430,10 +431,10 @@ public class SheetAPIActivity extends Activity
         protected void onPostExecute(List<String> output) {
             mProgress.hide();
             if (output == null || output.size() == 0) {
-                mOutputText.setText("No results returned.");
+//                mOutputText.setText("No results returned.");
             } else {
                 output.add(0, "Data retrieved using the Google Sheets API:");
-                mOutputText.setText(TextUtils.join("\n", output));
+//                mOutputText.setText(TextUtils.join("\n", output));
             }
 
             if(list.size() > 0) {
@@ -456,11 +457,11 @@ public class SheetAPIActivity extends Activity
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
                             SheetAPIActivity.REQUEST_AUTHORIZATION);
                 } else {
-                    mOutputText.setText("The following error occurred:\n"
-                            + mLastError.getMessage());
+//                    mOutputText.setText("The following error occurred:\n"
+//                            + mLastError.getMessage());
                 }
             } else {
-                mOutputText.setText("Request cancelled.");
+//                mOutputText.setText("Request cancelled.");
             }
         }
     }
