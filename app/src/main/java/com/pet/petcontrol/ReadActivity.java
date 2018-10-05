@@ -3,16 +3,22 @@ package com.pet.petcontrol;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuItemCompat;
+
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.pet.petcontrol.adapter.MyArrayAdapter;
@@ -34,6 +40,8 @@ public class ReadActivity extends AppCompatActivity {
     private ListView listView;
     private ArrayList<MyDataModel> list;
     private MyArrayAdapter adapter;
+    SearchView searchView;
+    int current_page = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +66,8 @@ public class ReadActivity extends AppCompatActivity {
          */
         listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
+
+
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -90,28 +100,19 @@ public class ReadActivity extends AppCompatActivity {
             }
         });
 
+
         /**
          * Just to know onClick and Printing Hello Toast in Center.
          */
         Toast toast = Toast.makeText(getApplicationContext(), "Click on FloatingActionButton to Load JSON", Toast.LENGTH_LONG);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
+        if (InternetConnection.checkConnection(getApplicationContext())) {
+            new GetDataTask().execute();
+        } else {
+            Toast.makeText(this, "Internet Connection Not Available", Snackbar.LENGTH_LONG).show();
+        }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(@NonNull View view) {
-
-                /**
-                 * Checking Internet Connection
-                 */
-                if (InternetConnection.checkConnection(getApplicationContext())) {
-                    new GetDataTask().execute();
-                } else {
-                    Snackbar.make(view, "Internet Connection Not Available", Snackbar.LENGTH_LONG).show();
-                }
-            }
-        });
     }
 
     /**
@@ -249,9 +250,52 @@ public class ReadActivity extends AppCompatActivity {
              */
             if(list.size() > 0) {
                 adapter.notifyDataSetChanged();
+                getData(current_page,"");
             } else {
                 Snackbar.make(findViewById(R.id.parentLayout), "No Data Found", Snackbar.LENGTH_LONG).show();
             }
         }
+    }
+
+    private void getData(int pageno, String query){
+
+        ArrayList<MyDataModel> output = new ArrayList<>();
+        ArrayList<MyDataModel> filteredOutput = new ArrayList<>();
+
+        for(int i=pageno-1; i<pageno+9;i++){
+            output.add(list.get(i));
+        }
+
+        if(searchView!=null){
+            for(MyDataModel item:output){
+                if(item.getNome_adot().toLowerCase().startsWith(query.toLowerCase()))
+                    filteredOutput.add(item);
+            }
+        }else
+            filteredOutput=output;
+
+        adapter = new MyArrayAdapter(ReadActivity.this,filteredOutput);
+        listView.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_search,menu);
+        MenuItem searchItem = menu.findItem(R.id.app_bar_search);
+        searchView = (SearchView) searchItem.getActionView();
+        searchView.setQueryHint("Insira Nome do Adotante, Nome do PET ou caracteristica para buscar");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                getData(current_page,newText);
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
     }
 }

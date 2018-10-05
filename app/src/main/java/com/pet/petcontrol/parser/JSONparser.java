@@ -1,6 +1,6 @@
 package com.pet.petcontrol.parser;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.squareup.okhttp.FormEncodingBuilder;

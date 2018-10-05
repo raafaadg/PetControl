@@ -1,6 +1,5 @@
 package com.pet.petcontrol;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -31,38 +30,42 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.text.TextUtils;
-import android.text.method.ScrollingMovementMethod;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+
+import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import androidx.appcompat.app.AppCompatActivity;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class SheetAPIActivity extends Activity
+public class SheetAPIReadActivity extends AppCompatActivity
         implements EasyPermissions.PermissionCallbacks {
     GoogleAccountCredential mCredential;
-    private TextView mOutputText;
-    private Button mCallApiButton;
     ProgressDialog mProgress;
     private ListView listView;
     private ArrayList<MyDataModel> list;
     private MyArrayAdapter adapter;
+
+    SearchView searchView;
+    int current_page = 1;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
@@ -89,7 +92,7 @@ public class SheetAPIActivity extends Activity
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(SheetAPIActivity.this,
+                Toast.makeText(SheetAPIReadActivity.this,
                         "SEGUROU o item " + String.valueOf(position),
                         Toast.LENGTH_SHORT).show();
                 return false;
@@ -114,25 +117,20 @@ public class SheetAPIActivity extends Activity
                                 list.get(position).getFemea() + " => " +
                                 list.get(position).getMacho() + " => "
                         , Snackbar.LENGTH_LONG).show();
-            }
-        });
-        Toast toast = Toast.makeText(getApplicationContext(), "Click on FloatingActionButton to Load JSON", Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.show();
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(@NonNull View view) {
-
-                /**
-                 * Checking Internet Connection
-                 */
-                if (InternetConnection.checkConnection(getApplicationContext())) {
-                    getResultsFromApi();
-                } else {
-                    Snackbar.make(view, "Internet Connection Not Available", Snackbar.LENGTH_LONG).show();
-                }
+                startActivity(new Intent()
+                        .setClass(SheetAPIReadActivity.this,SheetAPIUpdateActivity.class)
+                        .putExtra("ID",list.get(position).getNumero())
+                        .putExtra("Data_cap_cas",list.get(position).getData_cap_cas())
+                        .putExtra("Sexo",list.get(position).getSexo())
+                        .putExtra("Idade",list.get(position).getIdade())
+                        .putExtra("Carac",list.get(position).getCarac())
+                        .putExtra("Resp",list.get(position).getResp())
+                        .putExtra("Data_entrega",list.get(position).getData_entrega())
+                        .putExtra("Nome_adot",list.get(position).getNome_adot())
+                        .putExtra("Nome_animal",list.get(position).getNome_animal())
+                        .putExtra("Cast",list.get(position).getCast())
+                        .putExtra("Adocao",list.get(position).getAdocao())
+                );
             }
         });
 
@@ -144,6 +142,12 @@ public class SheetAPIActivity extends Activity
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
+
+        if (InternetConnection.checkConnection(getApplicationContext())) {
+            getResultsFromApi();
+        } else {
+            Toast.makeText(this, "Internet Connection Not Available", Snackbar.LENGTH_LONG).show();
+        }
     }
 
 
@@ -340,7 +344,7 @@ public class SheetAPIActivity extends Activity
             final int connectionStatusCode) {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         Dialog dialog = apiAvailability.getErrorDialog(
-                SheetAPIActivity.this,
+                SheetAPIReadActivity.this,
                 connectionStatusCode,
                 REQUEST_GOOGLE_PLAY_SERVICES);
         dialog.show();
@@ -439,6 +443,8 @@ public class SheetAPIActivity extends Activity
 
             if(list.size() > 0) {
                 adapter.notifyDataSetChanged();
+                getData(current_page,"");
+
             } else {
                 Snackbar.make(findViewById(R.id.parentLayout), "No Data Found", Snackbar.LENGTH_LONG).show();
             }
@@ -455,14 +461,66 @@ public class SheetAPIActivity extends Activity
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
                     startActivityForResult(
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            SheetAPIActivity.REQUEST_AUTHORIZATION);
+                            SheetAPIReadActivity.REQUEST_AUTHORIZATION);
                 } else {
-//                    mOutputText.setText("The following error occurred:\n"
-//                            + mLastError.getMessage());
+                    Log.e("api","The following error occurred:\n"
+                            + mLastError.getMessage());
+                    Toast.makeText(SheetAPIReadActivity.this, "The following error occurred:\n"
+                            + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             } else {
-//                mOutputText.setText("Request cancelled.");
-            }
+                Log.e("api","Request cancelled.");
+                Toast.makeText(SheetAPIReadActivity.this, "Request cancelled.",
+                        Toast.LENGTH_SHORT).show();            }
         }
+    }
+
+    private void getData(int pageno, String query){
+
+        ArrayList<MyDataModel> output = new ArrayList<>();
+        ArrayList<MyDataModel> filteredOutput = new ArrayList<>();
+
+        for(int i=pageno-1; i<pageno+list.size()-1;i++){
+            output.add(list.get(i));
+        }
+
+        if(searchView!=null){
+            for(MyDataModel item:output){
+                if(item.getData_cap_cas().toLowerCase().contains(query.toLowerCase())||
+                        item.getSexo().toLowerCase().contains(query.toLowerCase())||
+                        item.getIdade().toLowerCase().contains(query.toLowerCase())||
+                        item.getCarac().toLowerCase().contains(query.toLowerCase())||
+                        item.getResp().toLowerCase().contains(query.toLowerCase())||
+                        item.getData_entrega().toLowerCase().contains(query.toLowerCase())||
+                        item.getNome_adot().toLowerCase().contains(query.toLowerCase())||
+                        item.getNome_animal().toLowerCase().contains(query.toLowerCase()))
+                    filteredOutput.add(item);
+            }
+        }else
+            filteredOutput=output;
+
+        adapter = new MyArrayAdapter(SheetAPIReadActivity.this,filteredOutput);
+        listView.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_search,menu);
+        MenuItem searchItem = menu.findItem(R.id.app_bar_search);
+        searchView = (SearchView) searchItem.getActionView();
+        searchView.setQueryHint("Insira Nome do Adotante, Nome do PET ou caracteristica para buscar");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                getData(current_page,newText);
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
     }
 }

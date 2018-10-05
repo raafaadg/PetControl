@@ -4,12 +4,15 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         tvRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent numbersIntent = new Intent(MainActivity.this, ReadActivity.class);
+                Intent numbersIntent = new Intent(MainActivity.this, SheetAPIReadActivity.class);
                 startActivity(numbersIntent);
             }
         });
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.sheet).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getBaseContext(), SheetAPIActivity.class);
+                Intent intent = new Intent(getBaseContext(), SheetAPIWriteActivity.class);
                 startActivity(intent);
             }
         });
@@ -70,5 +73,6 @@ public class MainActivity extends AppCompatActivity {
         tvRead = (TextView) findViewById(R.id.tvRead);
         tvWrite = (TextView) findViewById(R.id.tvWrite);
     }
+
 }
 
